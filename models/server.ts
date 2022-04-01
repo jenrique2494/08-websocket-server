@@ -1,34 +1,28 @@
 import express, { Application } from "express";
-import userRoutes from "../routes/usuarios";
 import cors from "cors";
-import db from "../db/connection";
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
 const app = express();
 
-class Server {
+class ServerIo {
   private app: Application;
   private port: string;
-  private apiPaths = {
-    usuarios: "/api/usuarios",
-  };
+  private apiPaths = {};
+  private server: any;
+  private io: any;
 
   constructor() {
     this.app = express();
-
     this.port = process.env.PORT || "8000";
+    this.server  = createServer(this.app);
+    this.io = new Server(this.server);
+    
 
     // metodos iniciales
-    this.dbConnection();
     this.middlewares();
     this.routes();
   }
-  async dbConnection (){
-    try {
-      await db.authenticate();
-      console.log('Connection has been established successfully.');
-    } catch (error) {
-      throw new Error('error al conectar con la base de datos');
-    }
-  }
+  
 
   middlewares() {
     // CORS
@@ -40,17 +34,18 @@ class Server {
 
     // carpeta publica
     this.app.use(express.static('public'));
+
+    //sockets
   }
 
   routes() {
-    this.app.use(this.apiPaths.usuarios, userRoutes);
   }
 
   listen() {
-    this.app.listen(this.port, () => {
+    this.server.listen(this.port, () => {
       console.log("servidor corriendo en puerto ", this.port);
     });
   }
 }
 
-export default Server;
+export default ServerIo;
