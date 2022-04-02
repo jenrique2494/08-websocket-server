@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
+import { socketController } from "../sockets/controller";
 const app = express();
 
 class ServerIo {
@@ -9,7 +10,7 @@ class ServerIo {
   private port: string;
   private apiPaths = {};
   private server: any;
-  private io: any;
+  private io: Server;
 
   constructor() {
     this.app = express();
@@ -36,10 +37,17 @@ class ServerIo {
     this.app.use(express.static('public'));
 
     //sockets
+    this.sockets();
   }
 
   routes() {
   }
+  
+  sockets(){
+    this.io.on("connection", socketController);
+  }
+
+
 
   listen() {
     this.server.listen(this.port, () => {
